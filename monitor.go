@@ -22,8 +22,8 @@ const tpl = `
 	<meta charset="utf-8">
 
 	<title>Cosmos Hub Testnet Monitor</title>
-	<meta name="description" content="A faucet to get some coins.">
-	<meta name="author" content="Adrian Brink">
+	<meta name="description" content="A monitor for testnet.">
+	<meta name="author" content="suyu">
 
 	<link href="https://fonts.googleapis.com/css?family=Slabo+27px" rel="stylesheet">
 	<link rel="stylesheet" href="https://unpkg.com/blaze/scss/dist/components.buttons.min.css">
@@ -76,7 +76,7 @@ func main() {
 
 	chain = os.Getenv("CHAIN")
 	if chain == "" {
-		chain = "gaia-4000"
+		chain = "gaia-5000"
 	}
 
 	pass = os.Getenv("PASS")
@@ -164,7 +164,11 @@ func monitorHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := `
 	<h1>Cosmos Hub Testnet Monitor</h1>
+	<p>Chain ID: `+ chain + `</p> 
 	<p>Node: `+ node + `</p> 
+ 	<div class="box" id="status-box">
+      <p class="lead text-center">Blockchain Status: <span id="status">Fetching data ...</span></p>
+    </div>
 	<form action="/monitor" method="POST">
 	<input type="text" name="ip" class="c-field" required>
 	<br>
@@ -200,16 +204,13 @@ func getCoinsHandler(w http.ResponseWriter, r *http.Request) {
 
 func getMonitorHandler(w http.ResponseWriter, r *http.Request) {
 	ip := r.FormValue("ip")
+	node = ip
 	//sequence := executeGetSequence(faucet)
 
 	cmd := fmt.Sprintf("gaiacli status  --node=%v ", ip)
 	fmt.Println(cmd)
 
 	executeCmd(cmd, pass)
-
-	i, _ := strconv.Atoi(sequence)
-	i += 1
-	sequence = strconv.Itoa(i)
 
 	monitorHandler(w, r)
 	return
